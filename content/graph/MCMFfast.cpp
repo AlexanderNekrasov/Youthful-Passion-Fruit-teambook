@@ -16,7 +16,7 @@ struct MCMF {
   int n;
   void init(int N, int S, int T) {
     s = S, t = T, n = N;
-    g.resize(N);
+    g.assign(N, {});
     e.clear();
   }
   void addedge(int a, int b, int cap, int cost) {

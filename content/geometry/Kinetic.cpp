@@ -130,4 +130,4 @@ struct kinetic_segtree {
     ll query(int l, int r) {
         return query(1, 0, n, l, r + 1);
     }
-}
+};

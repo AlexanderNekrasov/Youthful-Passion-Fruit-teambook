@@ -26,6 +26,6 @@ vector<int> zf(string s) {
         if (i + z[i] - 1 > r)
             l = i, r = i + z[i] - 1;
     }
-    z[0] = n;
+    if (n) z[0] = n;
     return z;
 }

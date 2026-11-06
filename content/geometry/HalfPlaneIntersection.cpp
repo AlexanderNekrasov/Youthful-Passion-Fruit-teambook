@@ -8,7 +8,7 @@ vec getPoint(line l) { return {-l.b, l.a}; }
 
 bool bad(line a, line b, line c) {
     point x;
-    assert(intersect(b, c, x) == 1);
+    if (!intersect(b, c, x)) throw domain_error("Parallel HPI boundaries");
     return a.eval(x) < 0;
 }
 
@@ -59,7 +59,8 @@ vector<point> hpi(vector<line> lines) {
         }
         for (int j = en[st[i].second]; j < i; j++) {
             point I;
-            assert(intersect(st[j].first, st[j + 1].first, I) == 1);
+            if (!intersect(st[j].first, st[j + 1].first, I))
+                throw domain_error("Parallel HPI boundaries");
             ans.push_back(I);
         }
         break;

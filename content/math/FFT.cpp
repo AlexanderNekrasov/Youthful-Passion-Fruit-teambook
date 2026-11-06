@@ -68,7 +68,7 @@ vector <ll> mul(vector <ll> a, vector <ll> b) {
     FFT(cur, ma, true);
     vector <ll> ans(cur);
     for (int i = 0; i < cur; ++i) {
-        ans[i] = (ll)(ma[i].real() + 0.5);
+        ans[i] = llround(ma[i].real());
     }
     return ans;
 }

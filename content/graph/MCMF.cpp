@@ -15,7 +15,7 @@ struct MCMF {
     int n;
     void init(int N, int S, int T) {
         s = S, t = T, n = N;
-        g.resize(N);
+        g.assign(N, {});
         e.clear();
     }
     void addedge(int a, int b, int cap, int cost) {
@@ -30,17 +30,20 @@ struct MCMF {
         while (flow < k) {
             vector<int> d(n, INF);
             vector<int> pr(n);
+            vector<bool> inq(n, false);
             d[s] = 0;
             queue<int> q;
             q.push(s);
+            inq[s] = true;
             while (q.size()) {
                 int v = q.front();
                 q.pop();
+                inq[v] = false;
                 for (int i : g[v]) {
                     int u = e[i].b;
                     if (e[i].cap && d[u] > d[v] + e[i].cost) {
                         d[u] = d[v] + e[i].cost;
-                        q.push(u);
+                        if (!inq[u]) q.push(u), inq[u] = true;
                         pr[u] = i;
                     }
                 }

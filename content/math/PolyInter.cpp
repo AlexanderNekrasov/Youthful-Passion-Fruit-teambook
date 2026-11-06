@@ -6,6 +6,7 @@
  */
 typedef vector<double> vd;
 vd interpolate(vd x, vd y, int n) {
+  if (n == 0) return {};
   vd res(n), temp(n);
   for (int k = 0; k < n - 1; ++k)
     for (int i = k + 1; i < n; ++i) y[i] = (y[i] - y[k]) / (x[i] - x[k]);
@@ -18,3 +19,4 @@ vd interpolate(vd x, vd y, int n) {
       temp[i] -= last * x[k];
     }
   return res;
+}

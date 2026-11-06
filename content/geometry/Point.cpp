@@ -23,7 +23,17 @@ int sign(ld x) {
 #define vec point
 struct point {//% - cross, * - dot
     ld x, y;
-    auto operator<=>(const point&) const = default;
+    // Strict order for sorting/containers; tolerances belong in predicates.
+    auto operator<=>(const point &p) const { return tie(y, x) <=> tie(p.y, p.x); }
+    bool operator==(const point&) const = default;
+    ld dot(const point &p) const { return x * p.x + y * p.y; }
+    ld cross(const point &p) const { return x * p.y - y * p.x; }
+    ld dot(const point &a, const point &b) const {
+        return (a.x - x) * (b.x - x) + (a.y - y) * (b.y - y);
+    }
+    ld cross(const point &a, const point &b) const {
+        return (a.x - x) * (b.y - y) - (a.y - y) * (b.x - x);
+    }
 };
 ld operator*(const point &a, const point &b) {
     return a.x * b.x + a.y * b.y;
@@ -42,14 +52,6 @@ point operator*(const point &a, ld b) {
 }
 point operator/(const point &a, ld b) {
     return {a.x / b, a.y / b};
-}
-bool operator<(const point &a, const point &b)  {
-    if (sign(a.y - b.y) != 0) {
-        return a.y < b.y;
-    } else if (sign(a.x - b.x) != 0) {
-        return a.x < b.x;
-    }
-    return 0;
 }
 ld len2(const point &a) {
     return sq(a.x) + sq(a.y);

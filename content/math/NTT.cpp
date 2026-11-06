@@ -63,6 +63,8 @@ void initNTT() {
 }
 
 void ntt(int n, vector <int>& a, bool rev) {
+    if (n <= 0 || (n & (n - 1)) || n > (1 << MAXLOG) || a.size() != (size_t)n)
+        throw length_error("Invalid NTT size");
     if (!nttinit) {
         initNTT();
         nttinit = 1;
@@ -92,8 +94,11 @@ void ntt(int n, vector <int>& a, bool rev) {
 }
 
 vector<int> conv(vector<int> a, vector<int> b) {
+    if (a.empty() || b.empty()) return {0};
+    size_t need = a.size() + b.size() - 1;
+    if (need > (1u << MAXLOG)) throw length_error("Convolution exceeds MAXLOG");
     int lg = 0;
-    while ((1 << lg) < a.size() + b.size() + 1)
+    while ((1u << lg) < need)
         ++lg;
     int n = 1 << lg;
     assert(a.size() + b.size() <= n + 1);

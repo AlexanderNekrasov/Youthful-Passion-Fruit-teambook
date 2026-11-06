@@ -11,7 +11,7 @@ using ull = unsigned long long;
 #define pbc push_back
 #define mp make_pair
 #define all(v) begin(v),end(v)
-#define vin(v) for (auto &el : a) cin >> el
+#define vin(v) for (auto &el : (v)) cin >> el
 
 mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
 

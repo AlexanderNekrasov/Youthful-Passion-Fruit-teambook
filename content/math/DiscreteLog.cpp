@@ -1,7 +1,8 @@
 /**
  * Author: Iurii Pustovalov
  * Date: 2024-09-09
- * Description: Discrete log
+ * Description: Smallest x > 0 with a^x = b (mod m), or -1.
+ * Requires 0 <= a,b < m and products to fit in ll.
  * Time: O(\sqrt(n))
  */
 
@@ -14,3 +15,4 @@ ll modLog(ll a, ll b, ll m) {
     for (int i = 2; i < n + 2; ++i)
       if (A.count(e = e * f % m)) return n * i - A[e];
   return -1;
+}

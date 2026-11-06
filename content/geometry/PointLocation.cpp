@@ -3,26 +3,14 @@
  * Date: 2024-09-14
  * Description: Point location xd
  */
-const vec arb = {(int)1e9 + 228, (int)1e9 + 228}; // ne sovpadaet s drygimi tochkami
+const vec arb = {numeric_limits<ld>::infinity(), numeric_limits<ld>::infinity()};
+using coordinate = decltype(vec::x);
 
-bool ge(const ll& a, const ll& b) { return a >= b; }
-bool le(const ll& a, const ll& b) { return a <= b; }
-bool eq(const ll& a, const ll& b) { return a == b; }
-bool gt(const ll& a, const ll& b) { return a > b; }
-bool lt(const ll& a, const ll& b) { return a < b; }
-
-ll vec::dot(const vec &a)const {
-  return *this * a;
-}
-ll vec::cross(const vec &a) const {
-  return *this % a;
-}
-ll vec::dot(const vec &a, const vec &b) const {
-  return (a - *this) * (b - *this);
-}
-ll vec::cross(const vec &a, const vec &b) const {
-  return (a - *this) % (b - *this);
-}
+bool ge(const coordinate& a, const coordinate& b) { return a >= b; }
+bool le(const coordinate& a, const coordinate& b) { return a <= b; }
+bool eq(const coordinate& a, const coordinate& b) { return a == b; }
+bool gt(const coordinate& a, const coordinate& b) { return a > b; }
+bool lt(const coordinate& a, const coordinate& b) { return a < b; }
 
 struct Edge {
     vec l, r;
@@ -48,7 +36,7 @@ struct Event {
     bool operator<(const Event& event) const { return type < event.type; }
 };
 
-vector<Edge> sweepline(vector<Edge> planar, vector<vec> queries)
+vector<Edge> sweepline(vector<Edge> planar, vector<vec> queries, bool left_limit = false)
 {
     using vec_type = decltype(vec::x);
 
@@ -118,7 +106,7 @@ vector<Edge> sweepline(vector<Edge> planar, vector<vec> queries)
             if (event.type == GET) {
                 auto jt = vert.upper_bound(
                     make_pair(queries[event.pos].y, planar.size()));
-                if (jt != vert.begin()) {
+                if (!left_limit && jt != vert.begin()) {
                     --jt;
                     int i = jt->second;
                     if (ge(max(planar[i].l.y, planar[i].r.y),
@@ -136,6 +124,7 @@ vector<Edge> sweepline(vector<Edge> planar, vector<vec> queries)
             }
         }
 
+        if (left_limit) continue; // before starting edges of this component
         for (Event event : events[x]) {
             if (event.type != GET)
                 continue;
@@ -181,7 +170,7 @@ struct DCEL {
     vector<Edge> body;
 };
 // outer face is -1, returns (1,i) is point is strictly inside face i,
-// and (0,1) if point lies on the edge i
+// and (0,i) if point lies on edge i
 vector<pair<int, int>> point_location(DCEL planar, vector<vec> queries)
 {
     vector<pair<int, int>> ans(queries.size());
@@ -190,12 +179,12 @@ vector<pair<int, int>> point_location(DCEL planar, vector<vec> queries)
     map<Edge, int> added_on;
     int n = planar.body.size();
     for (int i = 0; i < n; i++) {
-        if (planar.body[i].face > planar.body[planar.body[i].twin].face)
+        if (i > planar.body[i].twin)
             continue;
         Edge e;
         e.l = planar.body[i].origin;
         e.r = planar.body[planar.body[i].twin].origin;
-        if (e.r.x < e.l.x) swap(e.l, e.r);
+        if (tie(e.r.x, e.r.y) < tie(e.l.x, e.l.y)) swap(e.l, e.r);
         added_on[e] = i;
         pos[e] =
             lt(planar.body[i].origin.x, planar.body[planar.body[i].twin].origin.x)
@@ -219,6 +208,8 @@ vector<pair<int, int>> point_location(DCEL planar, vector<vec> queries)
     }
     return ans;
 }
+// A plane embedding with edges intersecting only at shared endpoints.
+// O((V+E) log(V+E)); merges outer boundaries of disconnected components.
 DCEL buildDCEL(const vector<vec> &pts, const vector<vector<int>> &g) {
     int n = g.size();
     vector<vector<pair<int, int>>> g2(n);
@@ -243,12 +234,14 @@ DCEL buildDCEL(const vector<vec> &pts, const vector<vector<int>> &g) {
             ind[g2[i][j].second] = j;
         }
     }
-    using Edge = DCEL::Edge;
-    vector<Edge> edges(cur_edge);
+    using HalfEdge = DCEL::Edge;
+    vector<HalfEdge> edges(cur_edge);
     for (int i = 0; i < cur_edge; ++i) {
       edges[i].twin = i ^ 1;
     }
     int cur_face = 0;
+    vector<vector<int>> outer;
+    vector<vec> outer_points;
     for (int i = 0; i < n; ++i) {
         for (int ei = 0; ei < (int)g[i].size(); ++ei) {
             if (used[g2[i][ei].second]) continue;
@@ -268,14 +261,50 @@ DCEL buildDCEL(const vector<vec> &pts, const vector<vector<int>> &g) {
                 v = u;
                 e = newe;
             }
-            if (sign(get_area(face)) <= 0) {
-              for (int i : inds) {
-                edges[i].face = -1;
-              }
+            ld twice_area = 0;
+            for (int k = 0; k < (int)face.size(); ++k)
+                twice_area += face[k] % face[(k + 1) % face.size()];
+            if (sign(twice_area) <= 0) {
+                int id = -2 - (int)outer.size();
+                for (int e : inds) edges[e].face = id;
+                outer.push_back(inds);
+                outer_points.push_back(*min_element(all(face), [](vec a, vec b) {
+                    return tie(a.x, a.y) < tie(b.x, b.y);
+                }));
             } else {
-              ++cur_face;
+                ++cur_face;
             }
         }
     }
+    // Shoot downward immediately to the left of each component's leftmost
+    // vertex. Its own nonvertical edges have not entered the sweep yet.
+    vector<Edge> segments;
+    map<Edge, int> above;
+    for (int i = 0; i < cur_edge; i += 2) {
+        int j = edges[i].twin;
+        Edge e{edges[i].origin, edges[j].origin};
+        if (e.l.x == e.r.x) continue;
+        int face = edges[i].face;
+        if (e.r.x < e.l.x) swap(e.l, e.r), face = edges[j].face;
+        segments.push_back(e);
+        above[e] = face;
+    }
+    auto below = sweepline(segments, outer_points, true);
+    vector<int> parent(outer.size());
+    for (int i = 0; i < (int)outer.size(); ++i)
+        parent[i] = below[i].l == arb ? -1 : above.at(below[i]);
+    // Parents have smaller leftmost x; resolve chains without recursion.
+    for (int i = 0; i < (int)outer.size(); ++i) {
+        vector<int> path;
+        int f = -2 - i;
+        while (f < -1) {
+            int k = -2 - f;
+            path.push_back(k);
+            f = parent[k];
+        }
+        for (int k : path) parent[k] = f;
+    }
+    for (int i = 0; i < (int)outer.size(); ++i)
+        for (int e : outer[i]) edges[e].face = parent[i];
     return {edges};
 }

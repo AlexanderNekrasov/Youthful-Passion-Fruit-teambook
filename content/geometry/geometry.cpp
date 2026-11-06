@@ -424,7 +424,7 @@ Vec getPoint(Line l) { return Vec(-l.b, l.a); }
 
 bool bad(Line a, Line b, Line c) {
     Point x;
-    assert(cross(b, c, x) == 1);
+    if (cross(b, c, x) != 1) throw domain_error("Parallel HPI boundaries");
     return a.eval(x) > 0;
 }
 
@@ -480,7 +480,8 @@ vector<Point> hpi(vector<Line> lines) {
         }
         for (int j = en[st[i].second]; j < i; j++) {
             Point I;
-            assert(cross(st[j].first, st[j + 1].first, I) == 1);
+            if (cross(st[j].first, st[j + 1].first, I) != 1)
+                throw domain_error("Parallel HPI boundaries");
             ans.push_back(I);
         }
         break;

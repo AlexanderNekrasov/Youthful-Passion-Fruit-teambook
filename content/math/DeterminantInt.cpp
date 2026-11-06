@@ -22,3 +22,4 @@ ll det(vector<vector<ll>>& a) {
     if (!ans) return 0;
   }
   return (ans + mod) % mod;
+}

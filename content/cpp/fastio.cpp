@@ -20,12 +20,13 @@ inline int getChar() {
 }
 inline int readChar() {
   int c = getChar();
-  while (c <= 32) c = getChar();
+  while (c != -1 && c <= 32) c = getChar();
   return c;
 }
 template <class T>
 inline T readInt() {
   int s = 1, c = readChar();
+   if (c == -1) throw runtime_error("Unexpected EOF in readInt");
   T x = 0;
   if (c == '-') s = -1, c = getChar();
   while ('0' <= c && c <= '9') x = x * 10 + c - '0', c = getChar();

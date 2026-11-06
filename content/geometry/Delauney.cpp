@@ -15,17 +15,8 @@
  
 typedef vec P;
 typedef struct Quad* Q;
-// using lll = __int128_t; // (can be ll if coords are < 2e4)
-P arb{LLONG_MAX,LLONG_MAX}; // not equal to any other point
-#define rep(i,a,b) for (int i=a;i<b;++i)
-
-lll vec::cross(const vec &b) const {
-  return *this % b;
-}
-
-lll vec::cross(const vec &b, const vec &c) const {
-  return (b - *this) % (c - *this);
-}
+// Uses real-valued Point.cpp; exact integer predicates need a separate integer type.
+P arb{numeric_limits<ld>::infinity(), numeric_limits<ld>::infinity()}; // not equal to any other point
 
 struct Quad {
 	Q rot, o; P p = arb; bool mark;
@@ -36,14 +27,14 @@ struct Quad {
 } *H;
 
 bool circ(P p, P a, P b, P c) { // is p in the circumcircle?
-	lll p2 = len2(p), A = len2(a)-p2,
+	ld p2 = len2(p), A = len2(a)-p2,
 	    B = len2(b)-p2, C = len2(c)-p2;
 	return p.cross(a,b)*C + p.cross(b,c)*A + p.cross(c,a)*B > 0;
 }
 Q makeEdge(P orig, P dest) {
 	Q r = H ? H : new Quad{new Quad{new Quad{new Quad{0}}}};
 	H = r->o; r->r()->r() = r;
-	rep(i,0,4) r = r->rot, r->p = arb, r->o = i & 1 ? r : r->r();
+	for (int i = 0; i < 4; ++i) r = r->rot, r->p = arb, r->o = i & 1 ? r : r->r();
 	r->p = orig; r->F() = dest;
 	return r;
 }
@@ -98,7 +89,8 @@ pair<Q,Q> rec(const vector<P>& s) {
 }
 
 vector<P> triangulate(vector<P> pts) {
-	sort(all(pts));  assert(unique(all(pts)) == pts.end());
+	sort(all(pts), [](P a, P b) { return tie(a.x, a.y) < tie(b.x, b.y); });
+	assert(adjacent_find(all(pts)) == pts.end());
 	if (pts.size() < 2) return {};
 	Q e = rec(pts).first;
 	vector<Q> q = {e};

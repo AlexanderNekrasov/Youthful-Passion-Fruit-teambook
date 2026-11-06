@@ -43,7 +43,8 @@ vector<int> berlekamp(vector<int> x) {
 
 // kth element of p/q as fps
 int getkfps(vector<int> p, vector<int> q, ll k) {
-    assert(q[0] != 0);
+    assert(k >= 0 && !q.empty() && q[0] != 0);
+    if (p.empty()) return 0;
     while (k) {
         auto f = q;
         for (int i = 1; i < (int) f.size(); i += 2) {
@@ -55,6 +56,7 @@ int getkfps(vector<int> p, vector<int> q, ll k) {
         for (int i = k % 2; i < (int) p2.size(); i += 2) {
             p.pbc(p2[i]);
         }
+        if (p.empty()) return 0;
         for (int i = 0; i < (int)q2.size(); i += 2) {
             q.pbc(q2[i]);
         }
@@ -66,6 +68,9 @@ int getkfps(vector<int> p, vector<int> q, ll k) {
 // vals - initials values of reccurence, c - result of belekamp on vals
 int getk(const vector<int> &vals, vector<int> c, ll k) {
     int d = c.size();
+    assert(k >= 0 && (int)vals.size() >= d);
+    if (k < (ll)vals.size()) return vals[k];
+    if (d == 0) return 0;
     c.insert(c.begin(), MOD-1);
     while (c.back() == 0) {
         c.pop_back();

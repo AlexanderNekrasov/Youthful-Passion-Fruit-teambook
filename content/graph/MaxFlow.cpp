@@ -18,7 +18,8 @@ struct MaxFlow {
     vector<int> d, ptr;
     void init(int n_, int s_, int t_) {
         s = s_, t = t_, n = n_;
-        g.resize(n);
+        e.clear();
+        g.assign(n, {});
         ptr.resize(n);
     }
     void addedge(int a, int b, int cap) {
@@ -62,6 +63,7 @@ struct MaxFlow {
             e[id ^ 1].cap += x;
             flow -= x;
             sum += x;
+            if (!flow) return sum; // preserve the current residual edge
         }
         return sum;
     }
@@ -70,9 +72,7 @@ struct MaxFlow {
         while (1) {
             if (!bfs()) break;
             ptr.assign(n, 0);
-            int x = dfs(s, inf);
-            if (!x) break;
-            ans += x;
+            while (int x = dfs(s, inf)) ans += x;
         }
         return ans;
     }

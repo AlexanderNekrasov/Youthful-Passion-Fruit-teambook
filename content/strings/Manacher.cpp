@@ -16,12 +16,13 @@ vector<int> manacherOdd(string s) {
         if (i + k - 1 > r)
             l = i - k + 1, r = i + k - 1;
     }
+    return d1;
 }
 
 vector<int> manacherEven(string s) {
     int n = s.size();
     vector<int> d2(n);
-    l = 0, r = -1;
+    int l = 0, r = -1;
     for (int i = 0; i < n; ++i) {
         int k = i > r ? 0 : min(d2[l + r - i + 1], r - i + 1);
         while (i + k < n && i - k - 1 >= 0 && s[i + k] == s[i - k - 1])
@@ -30,4 +31,5 @@ vector<int> manacherEven(string s) {
         if (i + k - 1 > r)
             l = i - k, r = i + k - 1;
     }
+    return d2;
 }
