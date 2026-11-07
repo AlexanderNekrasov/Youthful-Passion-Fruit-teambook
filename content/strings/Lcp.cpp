@@ -12,7 +12,7 @@ vector<int> buildLCP(string &s, vector<int> &a) {
     for (int i = 0; i < n; i++) {
         ra[a[i]] = i;
     }
-    vector<int> lcp(max(0, n - 1));
+    vector<int> lcp(n - 1);
     int cur = 0;
     for (int i = 0; i < n; i++) {
         cur--;
@@ -36,8 +36,8 @@ void build(vector<int> &a) {
         spt[i][0] = a[i];
     }
     for (int i = 2; i < MAXN; ++i) cntr[i] = cntr[i / 2] + 1;
-    for (int h = 1; h < lgg && (1 << h) <= a.size(); ++h) {
-        for (int i = 0; i + (1 << h) <= a.size(); ++i) {
+    for (int h = 1; (1 << (h - 1)) < a.size(); ++h) {
+        for (int i = 0; i + (1 << (h - 1)) < a.size(); ++i) {
             spt[i][h] = min(spt[i][h - 1], spt[i + (1 << (h - 1))][h - 1]);
         }
     }

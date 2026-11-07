@@ -6,17 +6,14 @@
  */
 
 const int MAXN = 500;
-int n;
-ll g[MAXN][MAXN];
-ll best_cost;
+int n, g[MAXN][MAXN];
+int best_cost = 1000000000;
 vector<int> best_cut;
 void mincut() {
-    best_cost = n < 2 ? 0 : LLONG_MAX;
-    best_cut.clear();
     vector<int> v[MAXN];
     for (int i = 0; i < n; ++i)
         v[i].assign(1, i);
-    ll w[MAXN];
+    int w[MAXN];
     bool exist[MAXN], in_a[MAXN];
     memset(exist, true, sizeof exist);
     for (int ph = 0; ph < n - 1; ++ph) {

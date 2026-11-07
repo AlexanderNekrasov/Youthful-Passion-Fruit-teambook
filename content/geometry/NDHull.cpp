@@ -2,8 +2,7 @@
  * Author: talant
  * Date: 2024-09-09
  * Description: Hull in arbitrary number of dimensions
- * Time: O(N * (Dim! * Dim^2 * Hull + Dim^2 * Hull * log(Dim * Hull)))
- * For DIM=4, require |coordinate| <= 1e8 (128-bit orientation).
+ * Time: O(N*Dim*Hull)
  */
 const int DIM = 4;
 typedef array<ll, DIM> pt;
@@ -15,12 +14,12 @@ pt operator-(const pt &a, const pt &b) {
 typedef array<pt, DIM - 1> Edge;
 typedef array<pt, DIM> Face;
 vector<Face> faces;
-__int128 det(pt *a) {
+ll det(pt *a) {
   int p[DIM];
   iota(p, p + DIM, 0);
-  __int128 res = 0;
+  ll res = 0;
   do {
-    __int128 x = 1;
+    ll x = 1;
     forn(i, DIM) {
       forn(j, i) if (p[j] > p[i]) x *= -1;
       x *= a[i][p[i]];
@@ -29,19 +28,17 @@ __int128 det(pt *a) {
   } while (next_permutation(p, p + DIM));
   return res;
 }
-__int128 V(Face f, pt pivot) {
+ll V(Face f, pt pivot) {
   pt p[DIM];
   forn(i, DIM) p[i] = f[i] - pivot;
   return det(p);
 }
 void init(vector<pt> p) {
-  assert(p.size() >= DIM + 1);
-  faces.clear();
   forn(i, DIM + 1) {
     Face a;
     int q = 0;
     forn(j, DIM + 1) if (j != i) a[q++] = p[j];
-    auto v = V(a, p[i]);
+    ll v = V(a, p[i]);
     assert(v != 0);
     if (v < 0) swap(a[0], a[1]);
     faces.push_back(a);
@@ -56,8 +53,10 @@ void add(pt p) {
       newf.push_back(f);
   }
   if (bad.empty()) {
+    cout << " Ignore \n";
     return;
   }
+  cout << " Rebuild \n";
   faces = newf;
   vector<pair<Edge, pt>> edges;
   for (auto f : bad) {

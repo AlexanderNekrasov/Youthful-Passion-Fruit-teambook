@@ -8,29 +8,21 @@
  * Status: stress-tested
  */
 
-// Uses the real-valued point type from Point.cpp.
+// assumes points are long long, long double probably should work, but is slow
 pair<vec, vec> closest(vector<vec> v) {
-    assert(v.size() > 1);
-    sort(all(v), [](vec a, vec b) { return tie(a.x, a.y) < tie(b.x, b.y); });
-    pair<vec, vec> ans{v[0], v[1]};
-    ld best = len2(v[0] - v[1]);
-    set<pair<ld, ld>> active; // (y, x)
-    int j = 0;
-    for (int i = 0; i < (int)v.size(); ++i) {
-        if (best == 0) return ans;
-        vec p = v[i];
-        while (j < i && sq(p.x - v[j].x) > best) {
-            active.erase({v[j].y, v[j].x});
-            ++j;
-        }
-        ld radius = sqrt(best);
-        auto it = active.lower_bound({p.y - radius, -numeric_limits<ld>::infinity()});
-        for (; it != active.end() && it->first <= p.y + radius; ++it) {
-            vec q{it->second, it->first};
-            ld d = len2(p - q);
-            if (d < best) best = d, ans = {p, q};
-        }
-        active.insert({p.y, p.x});
-    }
-    return ans;
+	assert(v.size() > 1);
+	auto cmp = [](vec a, vec b) { return tie(a.x, a.y) < tie(b.x, b.y); };
+	set<vec, decltype(cmp)> S(cmp);
+	sort(all(v), [](vec a, vec b) { return a.y < b.y; });
+	pair<ld, pair<vec, vec>> ret{(ld)LLONG_MAX, {{0,0}, {0,0}}};
+	int j = 0;
+	for (vec p : v) {
+		vec d{sqrt(ret.first), 0};
+		while (sq(p.y - v[j].y) > ret.first) S.erase(v[j++]);
+		auto lo = S.lower_bound(p - d), hi = S.upper_bound(p + d);
+		for (; lo != hi; ++lo)
+			ret = min(ret, {len2(*lo - p), {*lo, p}});
+		S.insert(p);
+	}
+	return ret.second;
 }

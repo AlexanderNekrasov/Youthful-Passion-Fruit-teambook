@@ -4,17 +4,15 @@
  * Description: Creates Eertree of string str
  * Time: O(n)
  */
-// Zero-based lowercase string. Call init(capacity), then init(), before adding.
-// capacity >= 28 + number of distinct palindromes of length >= 2.
 struct eertree {
     int len[MAXN], suffLink[MAXN];
     int to[MAXN][26];
     int numV, v;
     void addLetter(int n, string &str) {
-        while (n - len[v] - 1 < 0 || str[n - len[v] - 1] != str[n])
+        while (str[n - len[v] - 1] != str[n])
             v = suffLink[v];
         int u = suffLink[v];
-        while (n - len[u] - 1 < 0 || str[n - len[u] - 1] != str[n])
+        while (str[n - len[u] - 1] != str[n])
             u = suffLink[u];
         int u_ = to[u][str[n] - 'a'];
         int v_ = to[v][str[n] - 'a'];

@@ -61,10 +61,11 @@ vector<vec> generateNonconvex(int n, int maxC) {
     return arr;
 }
 
-vector<vec> polyRemoveOnOneLine(vector<vec> arr) {
+template<typename T>
+vector<vec<T>> polyRemoveOnOneLine(vector<vec<T>> arr) {
     int n = arr.size();
     for (int it = 0; it < 3; ++it) {
-        vector<vec> res;
+        vector<vec<T>> res;
         for (auto el : arr) {
             if (res.size() >= 2 && sign((res[res.size() - 2] - el) % (res.back() - el)) == 0) {
                 res.pop_back();
@@ -72,7 +73,7 @@ vector<vec> polyRemoveOnOneLine(vector<vec> arr) {
             res.pbc(el);
         }
         arr = res;
-        if (!arr.empty()) rotate(arr.begin(), arr.begin() + 1, arr.end());
+        rotate(arr.begin(), 1 + all(arr));
     }
     return arr;
 }

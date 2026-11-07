@@ -32,8 +32,6 @@ void induced_sort(vector<int> &vec, int LIM, vector<int> &sa, vector<bool> &sl,
 }
 vector<int> SA_IS(vector<int> &vec, int LIM) {
     const int n = vec.size();
-    if (n == 0) return {};
-    if (n == 1) return {0};
     vector<int> sa(n), fx;
     vector<bool> sl(n);
     sl[n - 1] = false;
@@ -47,7 +45,7 @@ vector<int> SA_IS(vector<int> &vec, int LIM) {
     induced_sort(vec, LIM, sa, sl, fx);
     vector<int> nfx(fx.size()), lmv(fx.size());
     for (int i = 0, k = 0; i < n; ++i) {
-        if (sa[i] >= 1 && !sl[sa[i]] && sl[sa[i] - 1]) {
+        if (!sl[sa[i]] && sa[i] >= 1 && sl[sa[i] - 1]) {
             nfx[k++] = sa[i];
         }
     }

@@ -10,8 +10,8 @@ help:
 	@echo "	make kactl		- to build KACTL"
 	@echo "	make clean		- to clean up the build process"
 	@echo "	make veryclean		- to clean up and remove kactl.pdf"
-	@echo "	make test		- to run algorithm regression and differential tests"
-	@echo "	make test-compiles	- to compile the existing verification sources"
+	@echo "	make test		- to run all the stress tests in stress-tests/"
+	@echo "	make test-compiles	- to test compiling all headers"
 	@echo "	make help		- to show this information"
 	@echo "	make showexcluded	- to show files that are not included in the doc"
 	@echo ""
@@ -31,16 +31,16 @@ clean:
 veryclean: clean
 	rm -f kactl.pdf test-session.pdf
 
-.PHONY: help fast kactl clean veryclean test test-compiles
+.PHONY: help fast kactl clean veryclean
 
 build:
 	mkdir -p build/
 
 test:
-	python3 tests/run.py
+	./doc/scripts/run-all.sh .
 
 test-compiles:
-	python3 tests/compile_existing.py
+	./doc/scripts/compile-all.sh .
 
 test-session.pdf: content/test-session/test-session.tex content/test-session/chapter.tex | build
 	$(LATEXCMD) content/test-session/test-session.tex

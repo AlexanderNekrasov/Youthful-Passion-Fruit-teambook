@@ -1,32 +1,38 @@
 /**
  * Author: Iurii Pustovalov
- * Description: Deterministic Miller-Rabin for positive signed 64-bit integers.
- * Bases: the same set as original_content/number-theory/MillerRabin.h.
- * Time: O(log p), with seven bases and exact 128-bit products.
+ * Date: 2022-11-08
+ * Description: Checking primality of p
+ * Time: O(\log(C))
  */
-#pragma once
-ll prime_pow(ll a, ll e, ll mod) {
-    ll res = 1;
-    for (; e; e >>= 1, a = (__int128)a * a % mod)
-        if (e & 1) res = (__int128)res * a % mod;
-    return res;
-}
+const int iters = 8; // can change
 bool isprime(ll p) {
-    if (p < 2 || p % 2 == 0) return p == 2;
-    ll d = p - 1;
-    int s = 0;
-    while (d % 2 == 0) d /= 2, ++s;
-    for (ll a : {2LL, 325LL, 9375LL, 28178LL, 450775LL,
-                 9780504LL, 1795265022LL}) {
-        if (a % p == 0) continue;
-        ll x = prime_pow(a % p, d, p);
-        if (x == 1 || x == p - 1) continue;
-        bool passed = false;
-        for (int r = 1; r < s; ++r) {
-            x = (__int128)x * x % p;
-            if (x == p - 1) { passed = true; break; }
+    if (p == 1 || p == 4)
+        return 0;
+    if (p == 2 || p == 3)
+        return 1;
+    for (int it = 0; it < iters; ++it) {
+        ll a = rnd() % (p - 2) + 2;
+        __int128_t nw = p - 1;
+        while (nw % 2 == 0)
+            nw /= 2;
+        ll x = binpow(a, nw, p); // int128
+        if (x == 1)
+            continue;
+        ll last = x;
+        nw *= 2;
+        while (nw <= p - 1) {
+            x = (__int128_t)x * x % p;
+            if (x == 1) {
+                if (last != p - 1) {
+                    return 0;
+                }
+                break;
+            }
+            last = x;
+            nw *= 2;
         }
-        if (!passed) return false;
+        if (x != 1)
+            return 0;
     }
-    return true;
+    return 1;
 }

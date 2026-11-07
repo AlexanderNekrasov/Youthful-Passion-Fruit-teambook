@@ -26,7 +26,6 @@ inline int readChar() {
 template <class T>
 inline T readInt() {
   int s = 1, c = readChar();
-   if (c == -1) throw runtime_error("Unexpected EOF in readInt");
   T x = 0;
   if (c == '-') s = -1, c = getChar();
   while ('0' <= c && c <= '9') x = x * 10 + c - '0', c = getChar();

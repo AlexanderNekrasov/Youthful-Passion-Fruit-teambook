@@ -6,12 +6,6 @@
  */
 // all lines must be normed!!!!!, sign > 0
 bool isHpiEmpty(vector<line> lines) {
-    // Interval endpoints on a line need a geometric tolerance. Point's strict
-    // container ordering must not turn rounding noise into an empty interval.
-    auto before = [](point a, point b) {
-        if (sign(a.y - b.y) != 0) return a.y < b.y;
-        return sign(a.x - b.x) < 0;
-    };
     // return hpi(lines).empty();
     // overflow/precision problems?
     shuffle(all(lines), rnd);
@@ -38,15 +32,13 @@ bool isHpiEmpty(vector<line> lines) {
                     return true;
             } else {
                 if ((!sign(pi.y) ? sign(pi.x) : sign(pi.y)) * (sign(pi % pj)) ==
-                    1) {
-                    if (before(p, up)) up = p;
-                } else {
-                    if (before(down, p)) down = p;
-                }
+                    1)
+                    chkmin(up, p);
+                else
+                    chkmax(down, p);
             }
         }
-        ans = up;
-        if (before(ans, down))
+        if ((ans = up) < down)
             return true;
     }
     // for (int i = 0; i < n; ++i) {

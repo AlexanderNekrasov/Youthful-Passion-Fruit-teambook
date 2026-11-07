@@ -1,8 +1,7 @@
 /**
  * Author: Iurii Pustovalov
  * Date: 2024-09-09
- * Description: Smallest x > 0 with a^x = b (mod m), or -1.
- * Requires 0 <= a,b < m and products to fit in ll.
+ * Description: Discrete log
  * Time: O(\sqrt(n))
  */
 
